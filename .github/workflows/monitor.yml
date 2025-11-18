@@ -2,15 +2,18 @@ name: Monitor EDIT
 
 on:
   schedule:
-    - cron: "*/10 * * * *"   # Cada 10 minutos
+    - cron: "*/10 * * * *"    # cada 10 minutos
   workflow_dispatch:
+
+permissions:
+  contents: write        # necesario para hacer commits
 
 jobs:
   run-monitor:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -19,8 +22,17 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install feedparser requests
+          pip install requests feedparser
 
       - name: Run monitor
         run: |
           python monitor.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add hitos_edit.md last_title.txt || true
+          git commit -m "Actualización automática de hitos" || true
+          git push
+
